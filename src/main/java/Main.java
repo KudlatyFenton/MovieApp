@@ -1,6 +1,8 @@
+import java.awt.Menu;
+
 public class Main {
     public static void main(String[] args) {
 
-        GUI frame = new GUI();
+        MenuFrame menu = new MenuFrame();
     }
 }
