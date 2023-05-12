@@ -1,9 +1,15 @@
 public class Movie {
     String title;
-    String director;
-    double avgRating;
-    String[] genres;
+    String original_title;
+    //String director;
+    double vote_average;
+    //String[] genres;
     int id;
-    String description;
-    int rate;
+    String release_date;
+    String overview;
+    String backdrop_path;
+
+    public String getTitle() {
+        return title;
+    }
 }
