@@ -17,7 +17,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.sql.*;
-import java.util.Objects;
 
 
 public class MenuFrame extends JFrame{
@@ -46,10 +45,14 @@ public class MenuFrame extends JFrame{
     private JSlider voteSlider;
     private JLabel iconLabel;
     private JLabel appNameLabel;
+    private JLabel sLogoLabel;
+    private JButton sBackButton;
 
     private int currentMovieId;
 
     public MenuFrame() {
+
+
 
         menuSearchButton.addActionListener(e -> {
 

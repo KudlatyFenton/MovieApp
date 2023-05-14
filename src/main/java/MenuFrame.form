@@ -2,7 +2,7 @@
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="MenuFrame">
   <grid id="27dc6" binding="panel" layout-manager="CardLayout" hgap="0" vgap="0">
     <constraints>
-      <xy x="20" y="20" width="781" height="694"/>
+      <xy x="20" y="20" width="781" height="829"/>
     </constraints>
     <properties>
       <background color="-14935012"/>
@@ -89,27 +89,19 @@
           </component>
         </children>
       </grid>
-      <grid id="d6640" binding="searchPanel" layout-manager="GridLayoutManager" row-count="4" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="d6640" binding="searchPanel" layout-manager="GridLayoutManager" row-count="5" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <card name="Card2"/>
         </constraints>
         <properties>
-          <background color="-10723487"/>
+          <background color="-14606047"/>
         </properties>
         <border type="none"/>
         <children>
-          <component id="4b6b9" class="javax.swing.JButton" binding="searchButton" default-binding="true">
-            <constraints>
-              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text value="Search"/>
-            </properties>
-          </component>
           <component id="f288b" class="javax.swing.JTextField" binding="movieNameText">
             <constraints>
-              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+              <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="150" height="-1"/>
               </grid>
             </constraints>
@@ -119,7 +111,7 @@
           </component>
           <component id="c3be7" class="javax.swing.JLabel">
             <constraints>
-              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="1" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Enter movie name:"/>
@@ -127,16 +119,53 @@
           </component>
           <vspacer id="73c53">
             <constraints>
-              <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+              <grid row="4" column="0" row-span="1" col-span="4" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
             </constraints>
           </vspacer>
           <component id="c2e12" class="javax.swing.JList" binding="movieList">
             <constraints>
-              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="2" anchor="0" fill="3" indent="0" use-parent-layout="false">
+              <grid row="3" column="0" row-span="1" col-span="4" vsize-policy="6" hsize-policy="2" anchor="0" fill="3" indent="0" use-parent-layout="false">
                 <preferred-size width="150" height="50"/>
               </grid>
             </constraints>
             <properties/>
+          </component>
+          <component id="4b6b9" class="javax.swing.JButton" binding="searchButton" default-binding="true">
+            <constraints>
+              <grid row="2" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <background color="-14606047"/>
+              <foreground color="-14606047"/>
+              <icon value="magnify.png"/>
+              <text value=""/>
+            </properties>
+          </component>
+          <component id="52ad6" class="javax.swing.JLabel" binding="sLogoLabel">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <icon value="logo.png"/>
+              <text value=""/>
+            </properties>
+          </component>
+          <component id="6750f" class="javax.swing.JButton" binding="sBackButton">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="9" fill="0" indent="0" use-parent-layout="false">
+                <preferred-size width="183" height="30"/>
+              </grid>
+            </constraints>
+            <properties>
+              <background color="-14606047"/>
+              <borderPainted value="false"/>
+              <contentAreaFilled value="true"/>
+              <defaultCapable value="true"/>
+              <focusPainted value="false"/>
+              <foreground color="-14606047"/>
+              <icon value="back.png"/>
+              <text value=""/>
+            </properties>
           </component>
         </children>
       </grid>
