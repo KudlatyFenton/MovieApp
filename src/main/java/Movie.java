@@ -8,6 +8,7 @@ public class Movie {
     String release_date;
     String overview;
     String backdrop_path;
+    String poster_path;
 
     public String getTitle() {
         return title;
