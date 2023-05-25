@@ -60,6 +60,7 @@ public class MenuFrame extends JFrame{
             panel.removeAll();
             panel.add(searchPanel);
             panel.revalidate();
+            panel.updateUI();
 
         });
         searchButton.addActionListener(e -> {
@@ -138,7 +139,7 @@ public class MenuFrame extends JFrame{
                 try {
                     Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedb","root","");
                     Statement statement = connection.createStatement();
-                    ResultSet resultSet = statement.executeQuery("SELECT * FROM my_movie_list");
+                    ResultSet resultSet = statement.executeQuery("SELECT * FROM my_movie_list WHERE status=0");
 
                     DefaultListModel model = new DefaultListModel();
                     while (resultSet.next()){
@@ -169,14 +170,27 @@ public class MenuFrame extends JFrame{
 
                     if(!resultSet.next()) {
 
-                        String sql = "INSERT INTO `my_movie_list` (`movie_name`, `movie_id`, `movie_rating`, `date`, `status`) VALUES (?,?, ?, current_timestamp(), ?)";
-                        PreparedStatement preparedStatement = connection.prepareStatement(sql);
-                        preparedStatement.setString(1, movieTitleLabel.getText());
-                        preparedStatement.setInt(2, currentMovieId);
-                        preparedStatement.setDouble(3, 0);
-                        preparedStatement.setInt(4, 0);
+                        if (voteSlider.getValue()==0) {
+                            String sql = "INSERT INTO `my_movie_list` (`movie_name`, `movie_id`, `movie_rating`, `date`, `status`) VALUES (?,?, ?, current_timestamp(), ?)";
+                            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                            preparedStatement.setString(1, movieTitleLabel.getText());
+                            preparedStatement.setInt(2, currentMovieId);
+                            preparedStatement.setDouble(3, 0);
+                            preparedStatement.setInt(4, 0);
 
-                        preparedStatement.execute();
+                            preparedStatement.execute();
+                        }
+                        else {
+                            String sql = "INSERT INTO `my_movie_list` (`movie_name`, `movie_id`, `movie_rating`, `date`, `status`) VALUES (?,?, ?, current_timestamp(), ?)";
+                            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                            preparedStatement.setString(1, movieTitleLabel.getText());
+                            preparedStatement.setInt(2, currentMovieId);
+                            preparedStatement.setDouble(3, voteSlider.getValue());
+                            preparedStatement.setInt(4, 1);
+
+                            preparedStatement.execute();
+                        }
+
                     }
 
                 }
@@ -190,6 +204,81 @@ public class MenuFrame extends JFrame{
             @Override
             public void stateChanged(ChangeEvent e) {
                 voteLabel.setText("Ocena: "+ (double)voteSlider.getValue()/10);
+            }
+        });
+        sBackButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                panel.remove(searchPanel);
+                panel.add(menuPanel);
+                panel.revalidate();
+            }
+        });
+        myMoviesList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                JList theList = (JList) e.getSource();
+                Object o = theList.getModel().getElementAt(theList.locationToIndex(e.getPoint()));
+                System.out.println(o);
+
+                movieTitleLabel.setText(o.toString());
+
+
+                ResponseList responseList = responseList(o.toString());
+
+                releaseDateLabel.setText(responseList.results.get(0).release_date);
+                originalTitleLabel.setText(responseList.results.get(0).original_title);
+                overviewTextArea.setText(responseList.results.get(0).overview);
+                voteAverageLabel.setText(String.valueOf(responseList.results.get(0).vote_average));
+                currentMovieId = responseList.results.get(0).id;
+
+                URL imageUrl;
+                BufferedImage image = null;
+                try {
+                    image = ImageIO.read(new File("src/main/resources/img.png"));
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+                try {
+                    imageUrl = new URL("https://image.tmdb.org/t/p/w600_and_h900_bestv2"+responseList.results.get(0).poster_path);
+                    image = ImageIO.read(imageUrl);
+                } catch (IOException ex) {
+
+                    //throw new RuntimeException(ex);
+                }
+                Image scaledImage = image.getScaledInstance(200,300, Image.SCALE_DEFAULT);
+                imageLabel.setIcon(new ImageIcon(scaledImage));
+
+                panel.remove(moviesPanel);
+                panel.add(detailsPanel);
+                panel.revalidate();
+            }
+        });
+        moreButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                panel.removeAll();
+                panel.add(moviesPanel);
+                panel.revalidate();
+
+
+                try {
+                    Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedb","root","");
+                    Statement statement = connection.createStatement();
+                    ResultSet resultSet = statement.executeQuery("SELECT * FROM my_movie_list WHERE status=1");
+
+                    DefaultListModel model = new DefaultListModel();
+                    while (resultSet.next()){
+                        System.out.println(resultSet.getString("movie_id"));
+                        Movie movie = movieById(Integer.parseInt(resultSet.getString("movie_id")));
+                        model.addElement(movie.title);
+                    }
+                    myMoviesList.setModel(model);
+                }
+                catch (Exception exception){
+                    exception.printStackTrace();
+                }
             }
         });
     }
