@@ -6,6 +6,7 @@ public class ResponseList {
     int total_pages;
     int total_results;
 
+
     public int getPage() {
         return page;
     }

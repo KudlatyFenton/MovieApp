@@ -47,6 +47,7 @@ public class MenuFrame extends JFrame{
     private JLabel appNameLabel;
     private JLabel sLogoLabel;
     private JButton sBackButton;
+    private JTextArea notesTextArea;
 
     private int currentMovieId;
 
@@ -96,6 +97,8 @@ public class MenuFrame extends JFrame{
                 overviewTextArea.setText(responseList.results.get(0).overview);
                 voteAverageLabel.setText(String.valueOf(responseList.results.get(0).vote_average));
                 currentMovieId = responseList.results.get(0).id;
+                notesTextArea.setText(responseList.results.get(0).notes);
+                voteSlider.setValue(responseList.results.get(0).movie_rating);
 
                 URL imageUrl;
                 BufferedImage image = null;
@@ -143,8 +146,9 @@ public class MenuFrame extends JFrame{
 
                     DefaultListModel model = new DefaultListModel();
                     while (resultSet.next()){
-                        System.out.println(resultSet.getString("movie_id"));
-                        Movie movie = movieById(Integer.parseInt(resultSet.getString("movie_id")));
+
+                        Movie movie = movieById(Integer.parseInt(resultSet.getString("movie_id")),"",3);
+
                         model.addElement(movie.title);
                     }
                     myMoviesList.setModel(model);
@@ -171,22 +175,24 @@ public class MenuFrame extends JFrame{
                     if(!resultSet.next()) {
 
                         if (voteSlider.getValue()==0) {
-                            String sql = "INSERT INTO `my_movie_list` (`movie_name`, `movie_id`, `movie_rating`, `date`, `status`) VALUES (?,?, ?, current_timestamp(), ?)";
+                            String sql = "INSERT INTO `my_movie_list` (`movie_name`, `movie_id`, `movie_rating`, `date`, `status`, `notes`) VALUES (?,?, ?, current_timestamp(), ?, ?)";
                             PreparedStatement preparedStatement = connection.prepareStatement(sql);
                             preparedStatement.setString(1, movieTitleLabel.getText());
                             preparedStatement.setInt(2, currentMovieId);
                             preparedStatement.setDouble(3, 0);
                             preparedStatement.setInt(4, 0);
+                            preparedStatement.setString(5, notesTextArea.getText());
 
                             preparedStatement.execute();
                         }
                         else {
-                            String sql = "INSERT INTO `my_movie_list` (`movie_name`, `movie_id`, `movie_rating`, `date`, `status`) VALUES (?,?, ?, current_timestamp(), ?)";
+                            String sql = "INSERT INTO `my_movie_list` (`movie_name`, `movie_id`, `movie_rating`, `date`, `status`, `notes`) VALUES (?,?, ?, current_timestamp(), ?, ?)";
                             PreparedStatement preparedStatement = connection.prepareStatement(sql);
                             preparedStatement.setString(1, movieTitleLabel.getText());
                             preparedStatement.setInt(2, currentMovieId);
                             preparedStatement.setDouble(3, voteSlider.getValue());
                             preparedStatement.setInt(4, 1);
+                            preparedStatement.setString(5, notesTextArea.getText());
 
                             preparedStatement.execute();
                         }
@@ -232,7 +238,10 @@ public class MenuFrame extends JFrame{
                 overviewTextArea.setText(responseList.results.get(0).overview);
                 voteAverageLabel.setText(String.valueOf(responseList.results.get(0).vote_average));
                 currentMovieId = responseList.results.get(0).id;
-
+                notesTextArea.setText(responseList.results.get(0).notes);
+                voteSlider.setValue(responseList.results.get(0).movie_rating);
+                System.out.println("ocena : " + responseList.results.get(0).movie_rating);
+                System.out.println("notatka : " + responseList.results.get(0).notes);
                 URL imageUrl;
                 BufferedImage image = null;
                 try {
@@ -270,9 +279,9 @@ public class MenuFrame extends JFrame{
 
                     DefaultListModel model = new DefaultListModel();
                     while (resultSet.next()){
-                        System.out.println(resultSet.getString("movie_id"));
-                        Movie movie = movieById(Integer.parseInt(resultSet.getString("movie_id")));
+                        Movie movie = movieById(Integer.parseInt(resultSet.getString("movie_id")),resultSet.getString("notes"),Integer.parseInt(resultSet.getString("movie_rating")));
                         model.addElement(movie.title);
+
                     }
                     myMoviesList.setModel(model);
                 }
@@ -316,7 +325,7 @@ public class MenuFrame extends JFrame{
         return responseList;
     }
 
-    public Movie movieById(int id){
+    public Movie movieById(int id, String notes, int rating){
 
 
         OkHttpClient client = new OkHttpClient();
@@ -340,6 +349,8 @@ public class MenuFrame extends JFrame{
 
 
         Movie movie = gson.fromJson(jsonData, Movie.class);
+        movie.setNotes(notes);
+        movie.setMovie_rating(rating);
         System.out.println(movie.getTitle());
         return movie;
     }
