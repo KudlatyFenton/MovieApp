@@ -48,6 +48,7 @@ public class MenuFrame extends JFrame{
     private JLabel sLogoLabel;
     private JButton sBackButton;
     private JTextArea notesTextArea;
+    private JButton updateButton;
 
     private int currentMovieId;
 
@@ -119,6 +120,8 @@ public class MenuFrame extends JFrame{
 
                 panel.remove(searchPanel);
                 panel.add(detailsPanel);
+                addButton.show();
+                updateButton.hide();
                 panel.revalidate();
             }
         });
@@ -177,7 +180,7 @@ public class MenuFrame extends JFrame{
                         if (voteSlider.getValue()==0) {
                             String sql = "INSERT INTO `my_movie_list` (`movie_name`, `movie_id`, `movie_rating`, `date`, `status`, `notes`) VALUES (?,?, ?, current_timestamp(), ?, ?)";
                             PreparedStatement preparedStatement = connection.prepareStatement(sql);
-                            preparedStatement.setString(1, movieTitleLabel.getText());
+                            preparedStatement.setString(1, originalTitleLabel.getText());
                             preparedStatement.setInt(2, currentMovieId);
                             preparedStatement.setDouble(3, 0);
                             preparedStatement.setInt(4, 0);
@@ -188,7 +191,7 @@ public class MenuFrame extends JFrame{
                         else {
                             String sql = "INSERT INTO `my_movie_list` (`movie_name`, `movie_id`, `movie_rating`, `date`, `status`, `notes`) VALUES (?,?, ?, current_timestamp(), ?, ?)";
                             PreparedStatement preparedStatement = connection.prepareStatement(sql);
-                            preparedStatement.setString(1, movieTitleLabel.getText());
+                            preparedStatement.setString(1, originalTitleLabel.getText());
                             preparedStatement.setInt(2, currentMovieId);
                             preparedStatement.setDouble(3, voteSlider.getValue());
                             preparedStatement.setInt(4, 1);
@@ -209,7 +212,7 @@ public class MenuFrame extends JFrame{
         voteSlider.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                voteLabel.setText("Ocena: "+ (double)voteSlider.getValue()/10);
+                voteLabel.setText(String.valueOf((double)voteSlider.getValue()/10));
             }
         });
         sBackButton.addActionListener(new ActionListener() {
@@ -230,6 +233,22 @@ public class MenuFrame extends JFrame{
 
                 movieTitleLabel.setText(o.toString());
 
+                try {
+                    Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedb","root","");
+                    Statement statement = connection.createStatement();
+                    ResultSet resultSet = statement.executeQuery("SELECT * FROM my_movie_list WHERE movie_name='"+o.toString()+"'");
+                    resultSet.next();
+
+
+
+                    notesTextArea.setText(resultSet.getString("notes"));
+                    voteSlider.setValue(Integer.parseInt(resultSet.getString("movie_rating")));
+
+
+                }
+                catch (Exception exception){
+                    exception.printStackTrace();
+                }
 
                 ResponseList responseList = responseList(o.toString());
 
@@ -238,10 +257,7 @@ public class MenuFrame extends JFrame{
                 overviewTextArea.setText(responseList.results.get(0).overview);
                 voteAverageLabel.setText(String.valueOf(responseList.results.get(0).vote_average));
                 currentMovieId = responseList.results.get(0).id;
-                notesTextArea.setText(responseList.results.get(0).notes);
-                voteSlider.setValue(responseList.results.get(0).movie_rating);
-                System.out.println("ocena : " + responseList.results.get(0).movie_rating);
-                System.out.println("notatka : " + responseList.results.get(0).notes);
+
                 URL imageUrl;
                 BufferedImage image = null;
                 try {
@@ -261,6 +277,8 @@ public class MenuFrame extends JFrame{
 
                 panel.remove(moviesPanel);
                 panel.add(detailsPanel);
+                addButton.hide();
+                updateButton.show();
                 panel.revalidate();
             }
         });
@@ -284,6 +302,27 @@ public class MenuFrame extends JFrame{
 
                     }
                     myMoviesList.setModel(model);
+                }
+                catch (Exception exception){
+                    exception.printStackTrace();
+                }
+            }
+        });
+        updateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedb","root","");
+
+                    String sql = "UPDATE `my_movie_list` SET `movie_rating`=?, `status`=?, `notes`=? WHERE `movie_name`=?";
+                    PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                    preparedStatement.setInt(1, voteSlider.getValue());
+                    preparedStatement.setInt(2, 1);
+                    preparedStatement.setString(3, notesTextArea.getText());
+                    preparedStatement.setString(4, originalTitleLabel.getText());
+
+
+                    preparedStatement.execute();
                 }
                 catch (Exception exception){
                     exception.printStackTrace();
@@ -351,7 +390,6 @@ public class MenuFrame extends JFrame{
         Movie movie = gson.fromJson(jsonData, Movie.class);
         movie.setNotes(notes);
         movie.setMovie_rating(rating);
-        System.out.println(movie.getTitle());
         return movie;
     }
     public static void main(String[] args) {
