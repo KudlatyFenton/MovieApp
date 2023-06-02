@@ -233,6 +233,7 @@ public class MenuFrame extends JFrame{
                 Object o = theList.getModel().getElementAt(theList.locationToIndex(e.getPoint()));
                 previousPanel = moviesPanel;
 
+                Movie selectedMovie = new Movie();
 
 
                 try {
@@ -242,16 +243,17 @@ public class MenuFrame extends JFrame{
                     resultSet.next();
 
 
-
                     notesTextArea.setText(resultSet.getString("notes"));
                     voteSlider.setValue(Integer.parseInt(resultSet.getString("movie_rating")));
 
+
+                    selectedMovie = movieById(Integer.parseInt(resultSet.getString("movie_id")));
 
                 }
                 catch (Exception exception){
                     exception.printStackTrace();
                 }
-
+                System.out.println(selectedMovie.id);
                 ResponseList responseList = responseList(o.toString());
                 movieTitleLabel.setText(responseList.results.get(0).title);
                 releaseDateLabel.setText(responseList.results.get(0).release_date);
@@ -385,7 +387,7 @@ public class MenuFrame extends JFrame{
         Gson gson = new Gson();
         Response response = null;
         Request request = new Request.Builder()
-                .url("https://api.themoviedb.org/3/movie/"+id+"?api_key=21a9da83bb164b7801aa191f21e1db99")//.url("https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=1")
+                .url("https://api.themoviedb.org/3/movie/"+id+"?language=pl-PL")//.url("https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=1")
                 .get()
                 .addHeader("accept", "application/json")
                 .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMWE5ZGE4M2JiMTY0Yjc4MDFhYTE5MWYyMWUxZGI5OSIsInN1YiI6IjY0NWNkYjJkNmFhOGUwMDBlNGJlYjJiYiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.XlRR3UzQTFdfOZIWuj_eiLmxoNveXnNh9ZGcujLK9sI")

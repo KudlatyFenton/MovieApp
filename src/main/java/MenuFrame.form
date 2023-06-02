@@ -110,6 +110,7 @@
             </constraints>
             <properties>
               <background color="-13092808"/>
+              <font size="16"/>
               <foreground color="-1"/>
             </properties>
           </component>
@@ -172,6 +173,7 @@
             </constraints>
             <properties>
               <background color="-13092808"/>
+              <font size="16"/>
               <foreground color="-1"/>
               <model/>
             </properties>
