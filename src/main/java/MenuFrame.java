@@ -4,6 +4,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -49,8 +50,11 @@ public class MenuFrame extends JFrame{
     private JButton sBackButton;
     private JTextArea notesTextArea;
     private JButton updateButton;
+    private JButton mBackButton;
 
     private int currentMovieId;
+
+    private JPanel previousPanel = menuPanel;
 
     public MenuFrame() {
 
@@ -58,27 +62,28 @@ public class MenuFrame extends JFrame{
 
         menuSearchButton.addActionListener(e -> {
 
-
+            previousPanel = menuPanel;
             panel.removeAll();
             panel.add(searchPanel);
             panel.revalidate();
             panel.updateUI();
 
         });
-        searchButton.addActionListener(e -> {
+        Action searchAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ResponseList responseList = responseList(movieNameText.getText());
 
-
-
-            ResponseList responseList = responseList(movieNameText.getText());
-
-            DefaultListModel model = new DefaultListModel();
-            for(int i =0; i< responseList.results.size(); i++){
-                model.addElement(responseList.results.get(i).getTitle());
+                DefaultListModel model = new DefaultListModel();
+                for(int i =0; i< responseList.results.size(); i++){
+                    model.addElement(responseList.results.get(i).getTitle());
+                }
+                System.out.println(model);
+                movieList.setModel(model);
             }
-            System.out.println(model);
-            movieList.setModel(model);
-
-        });
+        };
+        searchButton.addActionListener(searchAction);
+        movieNameText.addActionListener(searchAction);
 
         movieList.addMouseListener(new MouseAdapter() {
             @Override
@@ -86,13 +91,10 @@ public class MenuFrame extends JFrame{
                 super.mouseClicked(e);
                 JList theList = (JList) e.getSource();
                 Object o = theList.getModel().getElementAt(theList.locationToIndex(e.getPoint()));
-                System.out.println(o);
-
+                previousPanel = searchPanel;
                 movieTitleLabel.setText(o.toString());
 
-
                 ResponseList responseList = responseList(o.toString());
-
                 releaseDateLabel.setText(responseList.results.get(0).release_date);
                 originalTitleLabel.setText(responseList.results.get(0).original_title);
                 overviewTextArea.setText(responseList.results.get(0).overview);
@@ -129,7 +131,7 @@ public class MenuFrame extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 panel.remove(detailsPanel);
-                panel.add(searchPanel);
+                panel.add(previousPanel);
                 panel.revalidate();
                 //searchButton.getAction();
             }
@@ -140,7 +142,7 @@ public class MenuFrame extends JFrame{
                 panel.removeAll();
                 panel.add(moviesPanel);
                 panel.revalidate();
-
+                panel.updateUI();
 
                 try {
                     Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedb","root","");
@@ -150,7 +152,7 @@ public class MenuFrame extends JFrame{
                     DefaultListModel model = new DefaultListModel();
                     while (resultSet.next()){
 
-                        Movie movie = movieById(Integer.parseInt(resultSet.getString("movie_id")),"",3);
+                        Movie movie = movieById(Integer.parseInt(resultSet.getString("movie_id")));
 
                         model.addElement(movie.title);
                     }
@@ -169,7 +171,7 @@ public class MenuFrame extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    System.out.println(movieTitleLabel.getText());
+
                     Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedb","root","");
 
                     Statement statement = connection.createStatement();
@@ -229,9 +231,9 @@ public class MenuFrame extends JFrame{
                 super.mouseClicked(e);
                 JList theList = (JList) e.getSource();
                 Object o = theList.getModel().getElementAt(theList.locationToIndex(e.getPoint()));
-                System.out.println(o);
+                previousPanel = moviesPanel;
 
-                movieTitleLabel.setText(o.toString());
+
 
                 try {
                     Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedb","root","");
@@ -251,7 +253,7 @@ public class MenuFrame extends JFrame{
                 }
 
                 ResponseList responseList = responseList(o.toString());
-
+                movieTitleLabel.setText(responseList.results.get(0).title);
                 releaseDateLabel.setText(responseList.results.get(0).release_date);
                 originalTitleLabel.setText(responseList.results.get(0).original_title);
                 overviewTextArea.setText(responseList.results.get(0).overview);
@@ -275,11 +277,13 @@ public class MenuFrame extends JFrame{
                 Image scaledImage = image.getScaledInstance(200,300, Image.SCALE_DEFAULT);
                 imageLabel.setIcon(new ImageIcon(scaledImage));
 
+                System.out.println(currentMovieId);
                 panel.remove(moviesPanel);
                 panel.add(detailsPanel);
                 addButton.hide();
                 updateButton.show();
                 panel.revalidate();
+
             }
         });
         moreButton.addActionListener(new ActionListener() {
@@ -288,7 +292,7 @@ public class MenuFrame extends JFrame{
                 panel.removeAll();
                 panel.add(moviesPanel);
                 panel.revalidate();
-
+                panel.updateUI();
 
                 try {
                     Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedb","root","");
@@ -297,7 +301,7 @@ public class MenuFrame extends JFrame{
 
                     DefaultListModel model = new DefaultListModel();
                     while (resultSet.next()){
-                        Movie movie = movieById(Integer.parseInt(resultSet.getString("movie_id")),resultSet.getString("notes"),Integer.parseInt(resultSet.getString("movie_rating")));
+                        Movie movie = movieById(Integer.parseInt(resultSet.getString("movie_id")));
                         model.addElement(movie.title);
 
                     }
@@ -329,7 +333,16 @@ public class MenuFrame extends JFrame{
                 }
             }
         });
+        mBackButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                panel.remove(moviesPanel);
+                panel.add(menuPanel);
+                panel.revalidate();
+            }
+        });
     }
+
 
     public ResponseList responseList(String movieTitle){
 
@@ -361,10 +374,11 @@ public class MenuFrame extends JFrame{
 
 
         ResponseList responseList = gson.fromJson(jsonData, ResponseList.class);
+
         return responseList;
     }
 
-    public Movie movieById(int id, String notes, int rating){
+    public Movie movieById(int id){
 
 
         OkHttpClient client = new OkHttpClient();
@@ -388,8 +402,6 @@ public class MenuFrame extends JFrame{
 
 
         Movie movie = gson.fromJson(jsonData, Movie.class);
-        movie.setNotes(notes);
-        movie.setMovie_rating(rating);
         return movie;
     }
     public static void main(String[] args) {
